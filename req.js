@@ -17,6 +17,7 @@ request(options, function (err, res, body) {
     }
     
     const enc = charset(res.headers, body); //사이트의 인코딩을 알아냄. 급식페이지는 euc-kr임
+    console.log(enc);
     const result = iconv.decode(body, enc);
 
     $ = cheerio.load(result);
