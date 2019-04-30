@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<% include layout/head %>
+
+<body>
+    <% include layout/nav %>
+    <div class="container">
+        <div class="row mt-4">
+            <h1>데이터 차트</h1>
+            <div class="col-10 offset-1">
+                <canvas id="myChart" width="600" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ctx = document.querySelector("#myChart").getContext("2d");
+
+        let myChart = new Chart(ctx, {
+            type: 'line',
+            data: <%- JSON.stringify(graphData) %>,
+            "options":{}
+        });
+    </script>
+</body>
+
+</html>
