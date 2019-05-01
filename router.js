@@ -132,11 +132,13 @@ router.get('/datalab', function(req, res){
     });
 });
 
+//여기서부터 4월 30일 과제였던 사용자 입력으로 데이터를 받아 그래프를 그리도록 하는 부분
 router.get("/datalab2", function(req, res){
-    let data = [
-        {"groupName":"방탄소년단","keywords":["방탄소년단", "BTS", "RM","전정국"]},
-        {"groupName":"트와이스","keywords":["트와이스", "Twice", "트둥이", "원스"]}
-    ];
+    res.render('data-view', {});
+});
+
+router.post("/datalab2", function(req, res){
+    let data = JSON.parse(req.body.data);
 
     datalab("2019-02-01", "2019-04-30", "week", data, function(result){
         let colors = ["rgb(255, 192, 192)", "rgb(75, 192, 255)", "rgb(75, 255, 128)"];
@@ -170,5 +172,5 @@ router.get("/datalab2", function(req, res){
         
     });
 });
-
+//여기까지 과제 종료
 module.exports = router;

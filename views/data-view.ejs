@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<% include layout/head %>
+<style>
+    .my-keyword {
+        position: relative;
+    }
+
+    .my-keyword>label {
+        margin: 0;
+    }
+
+    .icon-btn {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+
+    .keyword-col {
+        position: relative;
+        display: flex;
+    }
+
+    .keyword-col>input {
+        width: 80%;
+        display: inline-block;
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-right: 0px;
+        border-radius: .25rem 0 0 .25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .keyword-col > button {
+        width: 20%;
+        height: calc(1.5em + 0.75rem + 2px);
+        border: 1px solid #dc3545;
+        background-color: #fff;
+        border-radius: 0 0.25rem 0.25rem 0;
+        transition: all 0.15s;
+    }
+
+    .keyword-col>button:hover {
+        color: #fff;
+        background-color: #dc3545;
+    }
+</style>
+
+<body>
+    <% include layout/nav %>
+    <div class="container">
+        <h2 class="mt-3">일반적으로 쉽게 해결할 수 있는 방식</h2>
+        <div class="row mt-4">
+            <div class="col-10 offset-1">
+                <form action="/datalab2" method="post">
+                    <div class="form-group row">
+                        <label for="title" class="col-sm-2 col-form-label">주제</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="f-search" class="form-control" id="title" placeholder="검색할 데이터들의 주제를 입력하세요">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="keywords" class="col-sm-2 col-form-label">키워드들</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="keywords"
+                                placeholder="주제에 맞는 키워드를 , 로 구분하여 입력하세요">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row mt-1">
+            <div class="col-10 offset-1 text-right">
+                <button type="button" id="f-send" class="btn btn-outline-success">전송</button>
+            </div>
+        </div>
+
+        <h2 class="mt-5">구현하기 힘들지만 UI가 더 좋은 방식</h2>
+        <div class="row my-2">
+            <div class="col-10 offset-1 text-right">
+                <button class="btn btn-sm btn-outline-primary" id="addTitle">주제 추가</button>
+            </div>
+        </div>
+        <!--타이틀 추가시 여기에 계속 추가 돼 -->
+        <div id="title-list">
+            
+        </div>
+        <div class="row my-2">
+            <div class="col-10 offset-1 text-right">
+                <button type="button" id="s-send" class="btn btn-outline-success">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //첫번째 쉬운방식의 전송
+        /*let data = [
+            {"groupName":"방탄소년단","keywords":["방탄소년단", "BTS", "RM","전정국"]},
+            {"groupName":"트와이스","keywords":["트와이스", "Twice", "트둥이", "원스"]}
+        ];*/
+
+        let fTitle = document.querySelector("#f-search");
+        let keywords = document.querySelector("#keywords");
+        document.querySelector("#f-send").addEventListener("click", function(){
+            //첫번째 폼 전송버튼 클릭
+            if(fTitle.value == "" || keywords.value == ""){
+                alert("필수 값이 비어있습니다.")
+                return;
+            }
+            let searchData = [{"groupName":fTitle.value,"keywords": keywords.value.split(",")}]; //한개 데이터만 보낸다.
+
+            sendForm(searchData, "post", "/datalab2");
+        });
+
+        function sendForm(data, method, path){
+            let form = document.createElement("form");
+            form.setAttribute("method", method);
+            form.setAttribute("action", path);
+            let input = document.createElement("input");
+            input.setAttribute("type", "text");
+            input.setAttribute("name", "data");
+            input.setAttribute("value", JSON.stringify(data));
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        //두번째 어려운 방식의 전송
+        document.querySelector("#s-send").addEventListener("click", function(e){
+            let titleList = document.querySelectorAll("#title-list > div");
+            let sendData = [];
+            for(let i = 0; i < titleList.length; i++){
+                let title = titleList[i].querySelector(".a-title").value;
+                if(title == ""){
+                    alert("필수 값이 비어있습니다.");
+                    return;
+                }
+                let item = {"groupName":title,"keywords": []};
+                let keyList = titleList[i].querySelectorAll(".gondr-form-control");
+                for(let j = 0; j < keyList.length; j++){
+                    if(keyList[j].value == ""){
+                        alert("필수 값이 비어있습니다.");
+                        return;
+                    }
+                    item.keywords.push(keyList[j].value);
+                }
+
+                sendData.push(item);
+            }
+
+            sendForm(sendData, "post", "/datalab2");
+        });
+
+        //주제 추가 템플릿
+        let template = `
+            <div class="col-10 offset-1">
+                <div class="form-group row">
+                    <label for="title" class="col-sm-2 col-form-label">주제</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control a-title" placeholder="검색할 데이터들의 주제를 입력하세요">
+                    </div>
+                </div>
+                <div class="form-group row keyword-row" data-cnt="0">
+                    <div class="col-2 d-flex align-items-center my-keyword">
+                        <label>키워드</label>
+                        <button class="ml-2 btn icon-btn btn-primary">+</button>
+                    </div>
+                </div>
+            </div>`;
+
+        //키워드 추가 템플릿
+        let keywordTemplate = `
+            <div class="col-2 keyword-col">
+                <input type="text" class="gondr-form-control" placeholder="키워드">
+                <button>-</button>
+            </div>`;
+        let list = document.querySelector("#title-list");
+        let titleCnt = 0;
+        function addTitle(e) {
+            if (titleCnt >= 3) {
+                alert("주제는 3개까지 설정하실 수 있습니다.");
+                return;
+            }
+            let div = document.createElement("div");
+            div.classList.add("row", "mt-4");
+            div.innerHTML = template;
+            list.appendChild(div);
+
+            //키워드 추가 버튼에 이벤트 달아줌
+            let addBtn = div.querySelector(".icon-btn");
+            addBtn.addEventListener("click", addKeyword);
+            addBtn.click();
+            titleCnt++;
+        }
+
+        function addKeyword(e) {
+            let parent = e.target.parentElement.parentElement; //keyword-row 를 가져옴
+            let cnt = parent.dataset.cnt * 1; //숫자형으로 변경
+            if(cnt >= 5) {
+                alert("키워드는 5개까지 가능합니다.");
+                return;
+            }
+            parent.dataset.cnt++;
+            let div = document.createElement("div");
+            div.innerHTML = keywordTemplate;
+            div = div.firstElementChild;
+            div.querySelector("button").addEventListener("click", function(e){
+                if(parent.dataset.cnt == 1){
+                    alert("최소 한개의 키워드는 존재해야 합니다.");
+                    return;
+                }
+                parent.removeChild(div);
+                parent.dataset.cnt--;
+            });
+            parent.appendChild(div);
+        }
+
+
+        document.querySelector("#addTitle").addEventListener("click", addTitle);
+        addTitle(); //한개는 기본으로 추가하고
+
+    </script>
+</body>
+
+</html>
