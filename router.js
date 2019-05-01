@@ -2,39 +2,25 @@ const express = require('express');
 const request = require('request');
 const cheerio = require('cheerio');
 const qs = require('querystring');
-const router = express.Router(); 
 const mysql = require('mysql');
-const lunch = require('./lunch');
+const router = express.Router(); 
 
 const dbinfo = require('./dbinfo');
+const Top20 = require('./mymodules/Top20');
+const lunch = require('./mymodules/lunch');
 
-/* mysql 연결부분 */
+const datalab = require('./mymodules/NaverData');
+
 const conn = mysql.createConnection(dbinfo);
 
 conn.query("USE yy_30201"); //yy_30201 데이터베이스 사용
-// DB연결 종료
-
-const dlab = require('./datalab');
-
 
 router.get('/', function (req, res) {
     res.render('main', { msg: 'Welcome To Express4' });
 });
 
-
 router.get('/top20', function(req, res){
-
-    request("https://www.naver.com", function(err, response, body){
-        let list = [];
-        $ = cheerio.load(body);
-
-        let top20 = $(".ah_roll_area > .ah_l > li > a > .ah_k");
-
-        for(let i = 0; i < top20.length; i++){
-            let msg = $(top20[i]).text();
-            list.push(msg);
-        }
-
+    Top20(function(list){
         res.render('top', {msg:'네이버 실시간 급상승 검색어', list:list});
     });
 });
@@ -144,8 +130,45 @@ router.get('/datalab', function(req, res){
         
         res.render('datalab', {graphData:graphData});
     });
+});
 
+router.get("/datalab2", function(req, res){
+    let data = [
+        {"groupName":"방탄소년단","keywords":["방탄소년단", "BTS", "RM","전정국"]},
+        {"groupName":"트와이스","keywords":["트와이스", "Twice", "트둥이", "원스"]}
+    ];
 
+    datalab("2019-02-01", "2019-04-30", "week", data, function(result){
+        let colors = ["rgb(255, 192, 192)", "rgb(75, 192, 255)", "rgb(75, 255, 128)"];
+
+        let gData = {"labels":[], "datasets":[]};
+
+        let r = result.results;
+
+        for(let i = 0; i < r.length; i++){
+            let item = {
+                "label":r[i].title, 
+                "borderColor":colors[i], 
+                "fill":false, 
+                "lineTension":0.2, 
+                "data":[]
+            };
+
+            for(let j = 0; j < r[i].data.length; j++){
+                item.data.push(r[i].data[j].ratio);
+                if(i == 0){
+                    let date = r[i].data[j].period;
+                    let arr = date.split("-");
+                    gData.labels.push(arr[1]+ arr[2]);
+                }
+            }
+
+            gData.datasets.push(item);
+        }
+
+        res.render('datalab2', {g:gData});
+        
+    });
 });
 
 module.exports = router;

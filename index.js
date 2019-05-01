@@ -1,8 +1,7 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
-
-const bodyParser = require('body-parser');  //여기
+const bodyParser = require('body-parser');
 
 /* mysql 연결 종료 */
 
@@ -25,5 +24,3 @@ let server = http.createServer(app);
 server.listen(app.get('port'), function () {
     console.log(`Express 엔진이 ${app.get('port')}에서 실행중`);
 });
-
-
